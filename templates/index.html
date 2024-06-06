@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Status Checker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        async function updateStatus() {
+            const response = await fetch('/status');
+            const data = await response.json();
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+
+            let rowIndex = 1;
+            for (const [url, info] of Object.entries(data)) {
+                const row = document.createElement('div');
+                row.classList.add('row');
+
+                const number = document.createElement('div');
+                number.classList.add('cell', 'number-cell'); // Added class for specific styling
+                number.textContent = rowIndex;
+                row.appendChild(number);
+
+                const namaPerguruan = document.createElement('div');
+                namaPerguruan.classList.add('cell');
+                namaPerguruan.textContent = info.nama_perguruan;
+                row.appendChild(namaPerguruan);
+
+                const wilayah = document.createElement('div');
+                wilayah.classList.add('cell');
+                wilayah.textContent = info.wilayah;
+                row.appendChild(wilayah);
+
+                const link = document.createElement('div');
+                link.classList.add('cell');
+                link.innerHTML = `<a href="${url}" target="_blank">${url}</a>`;
+                row.appendChild(link);
+
+                const status = document.createElement('div');
+                status.classList.add('cell', 'status-cell'); // Added class for specific styling
+                status.textContent = info.status;
+                row.appendChild(status);
+
+                const statusBox = document.createElement('div');
+                statusBox.classList.add('status-box');
+                
+                if (info.status.includes("Success")) {
+                    statusBox.style.backgroundColor = 'green';
+                } else if (info.status.includes("Redirection")) {
+                    statusBox.style.backgroundColor = 'pink';
+                } else if (info.status.includes("Client Error")) {
+                    statusBox.style.backgroundColor = 'yellow';
+                } else if (info.status.includes("Server Error")) {
+                    statusBox.style.backgroundColor = 'red';
+                } else if (info.status.includes("Website invalid")) {
+                    statusBox.style.backgroundColor = 'red';
+                } else {
+                    statusBox.style.backgroundColor = 'gray';
+                }
+
+                row.appendChild(statusBox);
+                resultsDiv.appendChild(row);
+
+                rowIndex++;
+            }
+        }
+
+        setInterval(updateStatus, 10000); // Update every 10 seconds
+        document.addEventListener('DOMContentLoaded', updateStatus);
+    </script>
+</head>
+<body>
+    <h1>Website Status Checker</h1>
+    <div class="table-container">
+        <div class="table-header">
+            <div class="row header">
+                <div class="cell number-cell">No</div>
+                <div class="cell">Nama Perguruan</div>
+                <div class="cell">Wilayah</div>
+                <div class="cell">Website Link</div>
+                <div class="cell status-cell">Status</div> <!-- Updated -->
+                <div class="cell">Status Box</div>
+            </div>
+        </div>
+        <div id="results" class="table-content"></div>
+    </div>
+</body>
+</html>
